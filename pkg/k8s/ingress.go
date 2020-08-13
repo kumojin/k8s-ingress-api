@@ -1,66 +1,54 @@
 package k8s
 
-type IngressCreateOptions struct {
+import (
+	"k8s.io/api/extensions/v1beta1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/intstr"
+)
+
+type IngressCreateTrimOptions struct {
 	Name        string
 	Host        string
 	TargetHost  string
-	ServiceName string
-	ServicePort string
+	ServicePort int
 }
 
-type IngressCreateRuleOptions struct {
-	Host        string
-	ServiceName string
-	ServicePort string
-}
-
-func IngressBuildCreateConfig(options *IngressCreateOptions) map[string]interface{} {
-
-	hostRule := IngressBuildCreateRuleConfig(&IngressCreateRuleOptions{
-		Host:        options.Host,
-		ServiceName: options.ServiceName,
-		ServicePort: options.ServicePort,
-	})
-
-	targetHostRule := IngressBuildCreateRuleConfig(&IngressCreateRuleOptions{
-		Host:        options.TargetHost,
-		ServiceName: options.ServiceName,
-		ServicePort: options.ServicePort,
-	})
-
-	return map[string]interface{}{
-		"apiVersion": "networking.k8s.io/v1beta1",
-		"Kind":       "Ingress",
-		"metadata": map[string]interface{}{
-			"name":                           options.Name,
-			"kubernetes.io/ingress.class":    "nginx",
-			"cert-manager.io/cluster-issuer": "letsencrypt",
-			"nginx.ingress.kubernetes.io/force-ssl-redirect": "true",
+func BuildIngressCreateConfig(options *IngressCreateTrimOptions) *v1beta1.Ingress {
+	return &v1beta1.Ingress{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: ApiVersion,
+			Kind:       "Ingress",
 		},
-		"spec": map[string]interface{}{
-			"tls": []map[string]interface{}{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: options.Name,
+		},
+		Spec: v1beta1.IngressSpec{
+			TLS: []v1beta1.IngressTLS{
 				{
-					"hosts":      []string{options.TargetHost},
-					"secretName": options.Name,
+					Hosts:      []string{options.TargetHost},
+					SecretName: options.Name + "--" + options.TargetHost,
 				},
 			},
-			"rules": []map[string]interface{}{
-				hostRule,
-				targetHostRule,
-			},
-		},
-	}
-}
-
-func IngressBuildCreateRuleConfig(options *IngressCreateRuleOptions) map[string]interface{} {
-	return map[string]interface{}{
-		"host": options.Host,
-		"http": map[string]interface{}{
-			"paths": []map[string]interface{}{
+			Rules: []v1beta1.IngressRule{
 				{
-					"backend": map[string]interface{}{
-						"serviceName": options.ServiceName,
-						"servicePort": options.ServicePort,
+					Host: options.Host,
+					IngressRuleValue: v1beta1.IngressRuleValue{
+						HTTP: &v1beta1.HTTPIngressRuleValue{
+							Paths: []v1beta1.HTTPIngressPath{
+								{
+									Backend: v1beta1.IngressBackend{
+										ServiceName: options.Name,
+										ServicePort: intstr.FromInt(options.ServicePort),
+									},
+								},
+								{
+									Backend: v1beta1.IngressBackend{
+										ServiceName: options.Name,
+										ServicePort: intstr.FromInt(options.ServicePort),
+									},
+								},
+							},
+						},
 					},
 				},
 			},

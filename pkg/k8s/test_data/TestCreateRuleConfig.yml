@@ -1,6 +1,0 @@
-host: gl.com
-http:
-  paths:
-  - backend:
-      serviceName: some-service-name
-      servicePort: "80"
