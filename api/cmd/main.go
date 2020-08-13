@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"kumojin/k8s-ingress-api/api/server"
+	"github.com/kumojin/k8s-ingress-api/api/server"
 
 	"github.com/spf13/cobra"
 )
