@@ -3,22 +3,60 @@ package server
 import (
 	"net/http"
 
+	"github.com/kumojin/k8s-ingress-api/pkg/network"
 	echo "github.com/labstack/echo/v4"
 	echomiddleware "github.com/labstack/echo/v4/middleware"
 )
 
-func NewServer() (*echo.Echo, error) {
+type server struct {
+	EchoServer *echo.Echo
+}
 
-	server := echo.New()
+type validateCNAMEResponse struct {
+	CNAME   string `json:"cname"`
+	Matches string `json:"matches"`
+	Ok      bool   `json:"ok"`
+}
 
-	server.Use(echomiddleware.CORSWithConfig(echomiddleware.CORSConfig{
+func NewServer() *server {
+	s := &server{}
+	s.EchoServer = echo.New()
+
+	s.attachHandlers()
+
+	return s
+}
+
+func (s *server) attachHandlers() {
+	s.EchoServer.Use(echomiddleware.CORSWithConfig(echomiddleware.CORSConfig{
 		AllowOrigins: []string{"*"},
 		AllowMethods: []string{http.MethodOptions, http.MethodGet, http.MethodPost},
 	}))
 
-	server.Add(http.MethodGet, "ping", func(ctx echo.Context) error {
-		return ctx.String(http.StatusOK, "pong")
-	})
+	s.EchoServer.Add(http.MethodGet, "/ping", s.ping)
+	s.EchoServer.Add(http.MethodGet, "/cname/:cname/matches/:matches", s.validateCNAME)
+	//TODO create ingress
+}
 
-	return server, nil
+func (s *server) Start(port string) error {
+	return s.EchoServer.Start(port)
+}
+
+func (s *server) ping(c echo.Context) error {
+	return c.JSON(http.StatusOK, "pong")
+}
+
+func (s *server) validateCNAME(c echo.Context) error {
+	cname := c.Param("cname")
+	matches := c.Param("matches")
+	ok, err := network.ValidateCNAME(cname, matches)
+	if err != nil {
+		return err
+	}
+	c.JSON(http.StatusOK, &validateCNAMEResponse{
+		CNAME:   cname,
+		Matches: matches,
+		Ok:      ok,
+	})
+	return nil
 }
