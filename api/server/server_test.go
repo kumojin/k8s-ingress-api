@@ -56,3 +56,7 @@ func TestValidateCNAMEOk(t *testing.T) {
 		assert.Equal(t, "{\"cname\":\"m.facebook.com\",\"matches\":\"star-mini.c10r.facebook.com\",\"ok\":true}\n", string(rec.Body.Bytes()))
 	}
 }
+
+//TODO create ingress
+
+//TODO delete ingress

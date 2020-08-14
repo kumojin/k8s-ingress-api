@@ -1,6 +1,7 @@
 package k8s
 
 import (
+	"os"
 	"path/filepath"
 
 	"k8s.io/client-go/rest"
@@ -9,6 +10,10 @@ import (
 )
 
 func DefaultKubeConfigPath() string {
+	envPath := os.Getenv("KUBE_CONFIG") // TODO use viper
+	if envPath != "" {
+		return envPath
+	}
 	return filepath.Join(homedir.HomeDir(), ".kube", "config")
 }
 
