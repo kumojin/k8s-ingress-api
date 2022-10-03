@@ -1,50 +1,58 @@
 package k8s
 
 import (
-	"k8s.io/api/extensions/v1beta1"
+	v1 "k8s.io/api/networking/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
 type IngressCreateTrimOptions struct {
-	Name        string
-	Host        string
-	TargetHost  string
-	ServicePort int
+	Name              string `json:"name"`
+	Host              string `json:"host"`
+	TargetServiceName string `json:"targetServiceName"`
+	TargetServicePort int    `json:"targetServicePort"`
 }
 
-func BuildIngressCreateConfig(options *IngressCreateTrimOptions) *v1beta1.Ingress {
-	return &v1beta1.Ingress{
+func BuildIngressCreateConfig(options *IngressCreateTrimOptions) *v1.Ingress {
+	service := v1.IngressServiceBackend{
+		Name: options.TargetServiceName,
+		Port: v1.ServiceBackendPort{
+			Number: int32(options.TargetServicePort),
+		},
+	}
+
+	pathType := v1.PathTypeImplementationSpecific
+
+	return &v1.Ingress{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: ApiVersion,
 			Kind:       "Ingress",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name: options.Name,
+			Name: options.Name + "-" + options.Host,
+			Annotations: map[string]string{
+				"kubernetes.io/ingress.class":                    "nginx",
+				"cert-manager.io/cluster-issuer":                 "letsencrypt",
+				"nginx.ingress.kubernetes.io/force-ssl-redirect": "true",
+			},
 		},
-		Spec: v1beta1.IngressSpec{
-			TLS: []v1beta1.IngressTLS{
+		Spec: v1.IngressSpec{
+			TLS: []v1.IngressTLS{
 				{
-					Hosts:      []string{options.TargetHost},
-					SecretName: options.Name + "--" + options.TargetHost,
+					Hosts:      []string{options.Host},
+					SecretName: options.Name + "-" + options.Host,
 				},
 			},
-			Rules: []v1beta1.IngressRule{
+			Rules: []v1.IngressRule{
 				{
 					Host: options.Host,
-					IngressRuleValue: v1beta1.IngressRuleValue{
-						HTTP: &v1beta1.HTTPIngressRuleValue{
-							Paths: []v1beta1.HTTPIngressPath{
+					IngressRuleValue: v1.IngressRuleValue{
+						HTTP: &v1.HTTPIngressRuleValue{
+							Paths: []v1.HTTPIngressPath{
 								{
-									Backend: v1beta1.IngressBackend{
-										ServiceName: options.Name,
-										ServicePort: intstr.FromInt(options.ServicePort),
-									},
-								},
-								{
-									Backend: v1beta1.IngressBackend{
-										ServiceName: options.Name,
-										ServicePort: intstr.FromInt(options.ServicePort),
+									Path:     "/",
+									PathType: &pathType,
+									Backend: v1.IngressBackend{
+										Service: &service,
 									},
 								},
 							},

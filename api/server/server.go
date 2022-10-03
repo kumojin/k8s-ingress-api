@@ -76,17 +76,17 @@ func (s *server) createIngress(c echo.Context) error {
 
 	opts := new(k8s.IngressCreateTrimOptions)
 	if err := c.Bind(opts); err != nil {
-		return err
+		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
 	config, err := k8s.BuildDefaultKubeConfig()
 	if err != nil {
-		return err
+		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
 	k8sClient, err := kubernetes.NewForConfig(config)
 	if err != nil {
-		return err
+		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
 	createOpts := metav1.CreateOptions{}
@@ -97,8 +97,11 @@ func (s *server) createIngress(c echo.Context) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 3000*time.Millisecond)
 	defer cancel()
 
-	ingresses := k8sClient.ExtensionsV1beta1().Ingresses(namespace)
+	ingresses := k8sClient.NetworkingV1().Ingresses(namespace)
 	ingress, err := ingresses.Create(ctx, k8s.BuildIngressCreateConfig(opts), createOpts)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
 
 	c.JSON(http.StatusCreated, ingress)
 
@@ -129,7 +132,7 @@ func (s *server) deleteIngress(c echo.Context) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 3000*time.Millisecond)
 	defer cancel()
 
-	ingresses := k8sClient.ExtensionsV1beta1().Ingresses(namespace)
+	ingresses := k8sClient.NetworkingV1().Ingresses(namespace)
 	err = ingresses.Delete(ctx, name, deleteOpts)
 	if err != nil {
 		return err
