@@ -1,39 +1,49 @@
 package k8s
 
-import (
-	"io/ioutil"
-	"testing"
+// import (
+// 	"context"
+// 	"testing"
 
-	"github.com/stretchr/testify/assert"
-	"gopkg.in/yaml.v2"
-)
+// 	"github.com/stretchr/testify/assert"
+// 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+// 	"k8s.io/client-go/kubernetes"
+// )
 
-func TestCreateRuleConfig(t *testing.T) {
-	rule := IngressBuildCreateRuleConfig(&IngressCreateRuleOptions{
-		Host:        "gl.com",
-		ServiceName: "some-service-name",
-		ServicePort: "80",
-	})
+// func TestBuildIngressCreateConfig(t *testing.T) {
+// 	createOpts := &IngressCreateTrimOptions{
+// 		Name:        "stent-urlshortener",
+// 		Host:        "linkedin.cofomo.com",
+// 		TargetHost:  "stnt.co",
+// 		ServicePort: 80,
+// 	}
+// 	create := BuildIngressCreateConfig(createOpts)
+// 	assert.Equal(t, "Ingress", create.TypeMeta.Kind)
+// 	assert.Equal(t, createOpts.Name, create.ObjectMeta.Name)
+// 	//TODO continue
+// }
 
-	ruleYml, err := yaml.Marshal(&rule)
-	assert.Empty(t, err)
+// func TestCreateIngress(t *testing.T) {
+// 	ingressCreate := BuildIngressCreateConfig(&IngressCreateTrimOptions{
+// 		Name:        "stent-urlshortener",
+// 		Host:        "linkedin.cofomo.com",
+// 		TargetHost:  "stnt.co",
+// 		ServicePort: 80,
+// 	})
 
-	expectedYml, _ := ioutil.ReadFile("./test_data/TestCreateRuleConfig.yml")
-	assert.Equal(t, string(expectedYml), string(ruleYml))
-}
+// 	config, err := BuildDefaultKubeConfig()
+// 	assert.Empty(t, err)
 
-func TestCreateConfig(t *testing.T) {
-	rule := IngressBuildCreateConfig(&IngressCreateOptions{
-		Name:        "some-name",
-		Host:        "gl.com",
-		TargetHost:  "google.com",
-		ServiceName: "some-service-name",
-		ServicePort: "80",
-	})
+// 	k8sClient, err := kubernetes.NewForConfig(config)
+// 	assert.Empty(t, err)
 
-	ruleYml, err := yaml.Marshal(&rule)
-	assert.Empty(t, err)
+// 	ingresses := k8sClient.ExtensionsV1beta1().Ingresses(testNS)
 
-	expectedYml, _ := ioutil.ReadFile("./test_data/TestCreateConfig.yml")
-	assert.Equal(t, string(expectedYml), string(ruleYml))
-}
+// 	// create the ingress
+// 	// ingress, err := ingresses.Create(context.Background(), ingressCreate, metav1.CreateOptions{})
+// 	assert.Empty(t, err)
+// 	assert.NotEmpty(t, ingress)
+
+// 	// then, delete it
+// 	err = ingresses.Delete(context.Background(), ingressCreate.Name, metav1.DeleteOptions{})
+// 	assert.Empty(t, err)
+// }

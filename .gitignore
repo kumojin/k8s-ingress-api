@@ -50,4 +50,7 @@ Network Trash Folder
 Temporary Items
 .apdisk
 
+# Customs
+k8s-ingress-api
+
 # End of https://www.toptal.com/developers/gitignore/api/go,macos
