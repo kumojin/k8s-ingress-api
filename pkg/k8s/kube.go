@@ -1,26 +1,32 @@
 package k8s
 
 import (
-	"os"
-	"path/filepath"
-
+	"github.com/kumojin/k8s-ingress-api/api/config"
+	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/clientcmd"
-	"k8s.io/client-go/util/homedir"
 )
 
-func DefaultKubeConfigPath() string {
-	envPath := os.Getenv("KUBE_CONFIG") // TODO use viper
-	if envPath != "" {
-		return envPath
+type Client struct {
+	config config.IngressConfig
+	Client *kubernetes.Clientset
+}
+
+func NewClient(ig config.IngressConfig) (*Client, error) {
+	client, err := getInClusterClient()
+	if err != nil {
+		return nil, err
 	}
-	return filepath.Join(homedir.HomeDir(), ".kube", "config")
+
+	c := Client{config: ig, Client: client}
+	return &c, nil
 }
 
-func BuildDefaultKubeConfig() (*rest.Config, error) {
-	return BuildKubeConfig(DefaultKubeConfigPath())
-}
+func getInClusterClient() (*kubernetes.Clientset, error) {
+	// creates the in-cluster config
+	config, err := rest.InClusterConfig()
+	if err != nil {
+		panic(err.Error())
+	}
 
-func BuildKubeConfig(kubeConfig string) (*rest.Config, error) {
-	return clientcmd.BuildConfigFromFlags("", kubeConfig)
+	return kubernetes.NewForConfig(config)
 }

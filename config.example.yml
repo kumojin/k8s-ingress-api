@@ -1,0 +1,9 @@
+clusterIssuer: letsencrypt
+ingress:
+  class: nginx
+  customMeta:
+      "nginx.ingress.kubernetes.io/force-ssl-redirect": "true"
+  service:
+    name: example-svc
+    port:
+      number: 80
