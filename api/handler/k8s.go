@@ -1,0 +1,60 @@
+package handler
+
+import (
+	"github.com/kumojin/k8s-ingress-api/api/config"
+	"github.com/kumojin/k8s-ingress-api/pkg/k8s"
+	"github.com/labstack/echo/v4"
+	"net/http"
+	"strconv"
+)
+
+type handler struct {
+	client *k8s.Client
+	config config.IngressConfig
+}
+
+func NewHandler(config config.IngressConfig) handler {
+	client, err := k8s.NewClient(config)
+	if err != nil {
+		panic(err)
+	}
+
+	return handler{client, config}
+}
+
+func (h *handler) CreateIngress(c echo.Context) error {
+	dryRun, _ := strconv.ParseBool(c.QueryParam("dryRun"))
+	host := c.QueryParam("host")
+
+	ingress, err := h.client.CreateIngress(host, dryRun)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(http.StatusCreated, ingress)
+}
+
+func (h *handler) DeleteIngress(c echo.Context) error {
+	//name := c.Param("name")
+	//
+	//dryRun, _ := strconv.ParseBool(c.QueryParam("dryRun"))
+	//host := c.QueryParam("host")
+	//
+	//deleteOpts := metav1.DeleteOptions{}
+	//if dryRun {
+	//	deleteOpts.DryRun = []string{"All"}
+	//}
+	//
+	//ctx, cancel := context.WithTimeout(context.Background(), 3000*time.Millisecond)
+	//defer cancel()
+	//
+	//ingresses := h.client.Client.NetworkingV1().Ingresses(h.config.Namespace)
+	//err := ingresses.Delete(ctx, name, deleteOpts)
+	//if err != nil {
+	//	return err
+	//}
+	//
+	//c.JSON(http.StatusCreated, true)
+
+	return nil
+}

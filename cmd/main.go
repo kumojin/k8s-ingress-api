@@ -13,7 +13,6 @@ var (
 func RootCommand() *cobra.Command {
 	rootCommand := &cobra.Command{Use: "App"}
 
-	rootCommand.PersistentFlags().StringVar(&cfgFile, "config", "", "/path/to/config.yml")
 	rootCommand.AddCommand(apiCmd.MainCommand())
 
 	return rootCommand
