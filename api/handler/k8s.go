@@ -1,14 +1,11 @@
 package handler
 
 import (
-	"context"
 	"github.com/kumojin/k8s-ingress-api/api/config"
 	"github.com/kumojin/k8s-ingress-api/pkg/k8s"
 	"github.com/labstack/echo/v4"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"net/http"
 	"strconv"
-	"time"
 )
 
 type handler struct {
@@ -27,51 +24,37 @@ func NewHandler(config config.IngressConfig) handler {
 
 func (h *handler) CreateIngress(c echo.Context) error {
 	dryRun, _ := strconv.ParseBool(c.QueryParam("dryRun"))
+	host := c.QueryParam("host")
 
-	opts := new(k8s.IngressCreateTrimOptions)
-	if err := c.Bind(opts); err != nil {
-		return c.JSON(http.StatusInternalServerError, err.Error())
-	}
-
-	createOpts := metav1.CreateOptions{}
-	if dryRun {
-		createOpts.DryRun = []string{"All"}
-	}
-
-	ctx, cancel := context.WithTimeout(context.Background(), 3000*time.Millisecond)
-	defer cancel()
-
-	ingresses := h.client.Client.NetworkingV1().Ingresses(h.config.Namespace)
-	ingress, err := ingresses.Create(ctx, k8s.BuildIngressCreateConfig(opts), createOpts)
+	ingress, err := h.client.CreateIngress(host, dryRun)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	c.JSON(http.StatusCreated, ingress)
-
-	return nil
+	return c.JSON(http.StatusCreated, ingress)
 }
 
 func (h *handler) DeleteIngress(c echo.Context) error {
-	name := c.Param("name")
-
-	dryRun, _ := strconv.ParseBool(c.QueryParam("dryRun"))
-
-	deleteOpts := metav1.DeleteOptions{}
-	if dryRun {
-		deleteOpts.DryRun = []string{"All"}
-	}
-
-	ctx, cancel := context.WithTimeout(context.Background(), 3000*time.Millisecond)
-	defer cancel()
-
-	ingresses := h.client.Client.NetworkingV1().Ingresses(h.config.Namespace)
-	err := ingresses.Delete(ctx, name, deleteOpts)
-	if err != nil {
-		return err
-	}
-
-	c.JSON(http.StatusCreated, true)
+	//name := c.Param("name")
+	//
+	//dryRun, _ := strconv.ParseBool(c.QueryParam("dryRun"))
+	//host := c.QueryParam("host")
+	//
+	//deleteOpts := metav1.DeleteOptions{}
+	//if dryRun {
+	//	deleteOpts.DryRun = []string{"All"}
+	//}
+	//
+	//ctx, cancel := context.WithTimeout(context.Background(), 3000*time.Millisecond)
+	//defer cancel()
+	//
+	//ingresses := h.client.Client.NetworkingV1().Ingresses(h.config.Namespace)
+	//err := ingresses.Delete(ctx, name, deleteOpts)
+	//if err != nil {
+	//	return err
+	//}
+	//
+	//c.JSON(http.StatusCreated, true)
 
 	return nil
 }

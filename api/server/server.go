@@ -40,8 +40,8 @@ func (s *server) attachHandlers() {
 	s.EchoServer.Add(http.MethodGet, "/cname/:cname/matches/:matches", s.validateCNAME)
 
 	h := handler.NewHandler(s.IngressConfig)
-	s.EchoServer.Add(http.MethodPost, "/:namespace/ingress", h.CreateIngress)
-	s.EchoServer.Add(http.MethodDelete, "/:namespace/ingress/:name", h.DeleteIngress)
+	s.EchoServer.Add(http.MethodPost, "/ingress", h.CreateIngress)
+	//s.EchoServer.Add(http.MethodDelete, "/ingress/:name", h.DeleteIngress)
 }
 
 func (s *server) Start(port string) error {

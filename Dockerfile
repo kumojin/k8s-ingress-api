@@ -11,3 +11,4 @@ RUN apk add --no-cache tzdata ca-certificates
 COPY --from=build /code/app /app/app
 WORKDIR /app
 ENTRYPOINT [ "/app/app" ]
+CMD [ "web" ]

@@ -23,6 +23,14 @@ func GetIngressConfig() IngressConfig {
 	viper.SetDefault("clusterIssuer", "letsencrypt")
 	viper.SetDefault("ingress.class", "nginx")
 
+	if !viper.IsSet("ingress.service.name") {
+		panic("ingress.service.name config is missing")
+	}
+
+	if !viper.IsSet("ingress.service.port.number") && !viper.IsSet("ingress.service.port.name") {
+		panic("at least ingress.service.port.number or ingress.service.port.name config should be set")
+	}
+
 	c := IngressConfig{
 		Namespace:     viper.GetString("namespace"),
 		IngressClass:  viper.GetString("ingress.class"),
