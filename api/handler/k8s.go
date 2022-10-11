@@ -1,16 +1,21 @@
 package handler
 
 import (
+	"encoding/json"
 	"github.com/kumojin/k8s-ingress-api/api/config"
 	"github.com/kumojin/k8s-ingress-api/pkg/k8s"
 	"github.com/labstack/echo/v4"
+	"log"
 	"net/http"
+	"os"
 	"strconv"
 )
 
 type handler struct {
-	client *k8s.Client
-	config config.IngressConfig
+	client    *k8s.Client
+	config    config.IngressConfig
+	errLogger *log.Logger
+	logger    *log.Logger
 }
 
 func NewHandler(config config.IngressConfig) handler {
@@ -19,7 +24,7 @@ func NewHandler(config config.IngressConfig) handler {
 		panic(err)
 	}
 
-	return handler{client, config}
+	return handler{client, config, log.New(os.Stderr, "", 0), log.New(os.Stdout, "", 0)}
 }
 
 func (h *handler) CreateIngress(c echo.Context) error {
@@ -28,9 +33,12 @@ func (h *handler) CreateIngress(c echo.Context) error {
 
 	ingress, err := h.client.CreateIngress(host, dryRun)
 	if err != nil {
+		h.errLogger.Printf("Could not create ingress: %v\n", err.Error())
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
+	i, _ := json.Marshal(ingress)
+	h.logger.Printf("Created ingress: %v\n", string(i))
 	return c.JSON(http.StatusCreated, ingress)
 }
 
