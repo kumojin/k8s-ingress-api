@@ -24,7 +24,7 @@ data:
           number: 80
 ```
 
-For more information about possible configuration key, [read bellow](#Configuration)
+For more information about possible configuration key, [read below](#Configuration)
 
 ### Create Service Account, role and Role Binding
 
@@ -121,11 +121,11 @@ spec:
 
 ## Usage
 
-| Verb | Route                            | Query Params     | Note                                                                                                 |
-|------|----------------------------------|------------------|------------------------------------------------------------------------------------------------------|
-| GET  | `/ping`                          |                  | Always respond `pong` with a status 200                                                              |
-| POST | `/ingress`                       | `dryRun`, `host` | Create a new Ingress linked to the `host`. Return the Ingress Spec created as returned by Kubernetes |
-| GET  | `/cname/:cname/matches/:matches` |                  | Check if `:cname` match `:matches`, usefull before creating an ingress with a TLS certificate        |
+| Verb | Route                            | Query Params     | Note                                                                                                  |
+|------|----------------------------------|------------------|-------------------------------------------------------------------------------------------------------|
+| GET  | `/ping`                          |                  | Always respond `pong` with a status 200                                                               |
+| POST | `/ingress`                       | `dryRun`, `host` | Create a new Ingress linked to the `host`. Return the Ingress Spec created as returned by Kubernetes  |
+| GET  | `/cname/:cname/matches/:matches` |                  | Check if `:cname` match `:matches`, useful before creating an ingress with a TLS certificate          |
 
 ## Configuration
 The application is looking for a `config.yml` file located in `/etc/k8s-ingress-api` or in the current application directory.
@@ -139,4 +139,4 @@ The application is looking for a `config.yml` file located in `/etc/k8s-ingress-
 | `ingress.service.port.number` | Yes*     |           | Service port number used as backend for the ingress                                                                |
 | `ingress.service.port.name`   | Yes*     |           | Service port name as backend for the ingress                                                                       |
 
-> *Note:* *If `ingress.service.port.number` is not set, the application failback to `ingress.service.port.name` and if none of them are set, the application will not start
+> *Note:* *If `ingress.service.port.number` is not set, the application fallbacks to `ingress.service.port.name` and if none of them are set, the application will not start.
