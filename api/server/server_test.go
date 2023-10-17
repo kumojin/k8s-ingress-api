@@ -1,6 +1,7 @@
 package server
 
 import (
+	"github.com/kumojin/k8s-ingress-api/api/config"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -9,7 +10,10 @@ import (
 )
 
 func TestPing(t *testing.T) {
-	s := NewServer()
+	kc := config.GetKubernetesConfig()
+	kc.InCluster = false
+	ic := config.IngressConfig{}
+	s := NewServer(kc, ic)
 
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	rec := httptest.NewRecorder()
@@ -24,7 +28,10 @@ func TestPing(t *testing.T) {
 }
 
 func TestValidateCNAMENotOk(t *testing.T) {
-	s := NewServer()
+	kc := config.GetKubernetesConfig()
+	kc.InCluster = false
+	ic := config.IngressConfig{}
+	s := NewServer(kc, ic)
 
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	rec := httptest.NewRecorder()
@@ -41,7 +48,10 @@ func TestValidateCNAMENotOk(t *testing.T) {
 }
 
 func TestValidateCNAMEOk(t *testing.T) {
-	s := NewServer()
+	kc := config.GetKubernetesConfig()
+	kc.InCluster = false
+	ic := config.IngressConfig{}
+	s := NewServer(kc, ic)
 
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	rec := httptest.NewRecorder()

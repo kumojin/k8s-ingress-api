@@ -10,8 +10,9 @@ import (
 )
 
 type server struct {
-	EchoServer    *echo.Echo
-	IngressConfig config.IngressConfig
+	EchoServer       *echo.Echo
+	ingressConfig    config.IngressConfig
+	kubernetesConfig config.KubernetesConfig
 }
 
 type validateCNAMEResponse struct {
@@ -20,9 +21,10 @@ type validateCNAMEResponse struct {
 	Ok      bool   `json:"ok"`
 }
 
-func NewServer() *server {
+func NewServer(kubernetesConfig config.KubernetesConfig, ingressConfig config.IngressConfig) *server {
 	s := &server{
-		IngressConfig: config.GetIngressConfig(),
+		ingressConfig:    ingressConfig,
+		kubernetesConfig: kubernetesConfig,
 	}
 
 	s.EchoServer = echo.New()
@@ -39,7 +41,7 @@ func (s *server) attachHandlers() {
 	s.EchoServer.Add(http.MethodGet, "/ping", s.ping)
 	s.EchoServer.Add(http.MethodGet, "/cname/:cname/matches/:matches", s.validateCNAME)
 
-	h := handler.NewHandler(s.IngressConfig)
+	h := handler.NewHandler(s.kubernetesConfig, s.ingressConfig)
 	s.EchoServer.Add(http.MethodPost, "/ingress", h.CreateIngress)
 	//s.EchoServer.Add(http.MethodDelete, "/ingress/:name", h.DeleteIngress)
 }

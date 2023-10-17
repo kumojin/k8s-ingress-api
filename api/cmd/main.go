@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"github.com/kumojin/k8s-ingress-api/api/config"
 	"github.com/kumojin/k8s-ingress-api/api/server"
 	"github.com/spf13/viper"
 
@@ -25,6 +26,8 @@ func bootWebServer(cmd *cobra.Command, args []string) {
 
 	viper.ReadInConfig()
 
-	s := server.NewServer()
+	kc := config.GetKubernetesConfig()
+	ic := config.GetIngressConfig()
+	s := server.NewServer(kc, ic)
 	s.EchoServer.Logger.Fatal(s.Start(":3000"))
 }

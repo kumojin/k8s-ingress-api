@@ -18,13 +18,13 @@ type handler struct {
 	logger    *log.Logger
 }
 
-func NewHandler(config config.IngressConfig) handler {
-	client, err := k8s.NewClient(config)
+func NewHandler(kc config.KubernetesConfig, ic config.IngressConfig) handler {
+	client, err := k8s.NewClient(kc, ic)
 	if err != nil {
 		panic(err)
 	}
 
-	return handler{client, config, log.New(os.Stderr, "", 0), log.New(os.Stdout, "", 0)}
+	return handler{client, ic, log.New(os.Stderr, "", 0), log.New(os.Stdout, "", 0)}
 }
 
 func (h *handler) CreateIngress(c echo.Context) error {
