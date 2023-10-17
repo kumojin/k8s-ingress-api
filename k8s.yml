@@ -1,0 +1,101 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: ingress-api
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: manage-ingress
+rules:
+  - apiGroups: ["networking.k8s.io"]
+    resources: ["ingresses"]
+    verbs: ["get", "list", "create", "update", "patch", "delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: manage-ingress-binding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: manage-ingress
+subjects:
+- apiGroup: ""
+  kind: ServiceAccount
+  name: ingress-api
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ingress-api
+  labels:
+    name: ingress-api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ingress-api
+  template:
+    metadata:
+      labels:
+        app: ingress-api
+    spec:
+      serviceAccountName: ingress-api
+      containers:
+        - name: ingress-api
+          args: ["web"]
+          image: kumojin/ingress-api:v1.1.0
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3000
+          readinessProbe:
+            httpGet:
+              path: /ping
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /ping
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          volumeMounts:
+            - mountPath: /etc/k8s-ingress-api
+              name: config
+              readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            name: ingress-api-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ingress-api
+spec:
+  ports:
+    - name: http
+      targetPort: 3000
+      port: 80
+  selector:
+    app: ingress-api
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ingress-api-config
+data:
+  config.yml: |
+    namespace: default
+    clusterIssuer: letsencrypt
+    ingress:
+      class: nginx
+      customMeta:
+        "nginx.ingress.kubernetes.io/force-ssl-redirect": "true"
+      service:
+        name: my-service
+        port:
+          number: 80
+
