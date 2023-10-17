@@ -6,10 +6,12 @@ type portConfig struct {
 	Name   *string
 	Number *int32
 }
+
 type serviceConfig struct {
 	Name string
 	Port portConfig
 }
+
 type IngressConfig struct {
 	Namespace     string
 	IngressClass  string
