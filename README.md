@@ -3,12 +3,13 @@
 ## Requirements
 
 - Kubernetes >= 1.19
-- An ingress controller installed (default to nginx Ingress Controller)
+- An ingress controller installed (defaults to nginx Ingress Controller)
 - Optional: Cert Manager
 
 ## Install & Run
 
 ### Create a ConfigMap
+
 ```yaml
 apiVersion: v1
 kind: ConfigMap
@@ -24,7 +25,7 @@ data:
           number: 80
 ```
 
-For more information about possible configuration key, [read below](#Configuration)
+For more information about possible configuration keys, [read below](#configuration).
 
 ### Create Service Account, role and Role Binding
 
@@ -123,20 +124,21 @@ spec:
 
 | Verb | Route                            | Query Params     | Note                                                                                                  |
 |------|----------------------------------|------------------|-------------------------------------------------------------------------------------------------------|
-| GET  | `/ping`                          |                  | Always respond `pong` with a status 200                                                               |
-| POST | `/ingress`                       | `dryRun`, `host` | Create a new Ingress linked to the `host`. Return the Ingress Spec created as returned by Kubernetes  |
-| GET  | `/cname/:cname/matches/:matches` |                  | Check if `:cname` match `:matches`, useful before creating an ingress with a TLS certificate          |
+| GET  | `/ping`                          |                  | Always answers `pong` with 200 a status                                                                |
+| POST | `/ingress`                       | `dryRun`, `host` | Creates a new Ingress linked to the `host`. Returns the created Ingress Spec as returned by Kubernetes  |
+| GET  | `/cname/:cname/matches/:matches` |                  | Checks if `:cname` matches the given `:matches`, useful before creating an ingress with a TLS certificate.          |
 
 ## Configuration
-The application is looking for a `config.yml` file located in `/etc/k8s-ingress-api` or in the current application directory.
+
+The application is looking for a `config.yml` file located in the `/etc/k8s-ingress-api` directory or in the current application directory.
 
 | Key                           | Required | Default   | Notes                                                                                                              |
 |-------------------------------|----------|-----------|--------------------------------------------------------------------------------------------------------------------|
-| `namespace`                   | Yes      | `default` | Namespace use for the ingress                                                                                      |
-| `ingress.class`               | Yes      | `nginx`   | Value of `kubernetes.io/ingress.class`                                                                             |
-| `ingress.customMeta`          | No       | `[]`      | List of custom metadata to add in the Ingress spec like `"nginx.ingress.kubernetes.io/force-ssl-redirect": "true"` |
-| `ingress.service.name`        | Yes      |           | Service Name used as backend for the ingress                                                                       |
-| `ingress.service.port.number` | Yes*     |           | Service port number used as backend for the ingress                                                                |
-| `ingress.service.port.name`   | Yes*     |           | Service port name as backend for the ingress                                                                       |
+| `namespace`                   | Yes      | `default` | Namespace used for the ingress.                                                                                      |
+| `ingress.class`               | Yes      | `nginx`   | Value of `kubernetes.io/ingress.class`.                                                                             |
+| `ingress.customMeta`          | No       | `[]`      | List of custom metadata to add to the Ingress spec like `"nginx.ingress.kubernetes.io/force-ssl-redirect": "true"` |
+| `ingress.service.name`        | Yes      |           | Service Name used as backend for the ingress.                                                                       |
+| `ingress.service.port.number` | Yes*     |           | Service port number used as backend for the ingress.                                                               |
+| `ingress.service.port.name`   | Yes*     |           | Service port name as backend for the ingress.                                                                       |
 
-> *Note:* *If `ingress.service.port.number` is not set, the application fallbacks to `ingress.service.port.name` and if none of them are set, the application will not start.
+> 📓 **Note**: If `ingress.service.port.number` is not set, the application falls back to `ingress.service.port.name` and if none of them are set, the application does not start.
