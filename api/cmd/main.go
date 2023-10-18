@@ -3,6 +3,7 @@ package cmd
 import (
 	"github.com/kumojin/k8s-ingress-api/api/config"
 	"github.com/kumojin/k8s-ingress-api/api/server"
+	"github.com/kumojin/k8s-ingress-api/pkg/k8s"
 	"github.com/spf13/viper"
 
 	"github.com/spf13/cobra"
@@ -28,6 +29,11 @@ func bootWebServer(cmd *cobra.Command, args []string) {
 
 	kc := config.GetKubernetesConfig()
 	ic := config.GetIngressConfig()
-	s := server.NewServer(kc, ic)
+	kclient, err := k8s.NewClient(kc, ic)
+	if err != nil {
+		panic(err)
+	}
+
+	s := server.NewServer(kc, ic, kclient)
 	s.EchoServer.Logger.Fatal(s.Start(":3000"))
 }
