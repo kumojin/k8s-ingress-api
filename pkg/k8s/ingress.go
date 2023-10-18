@@ -23,13 +23,13 @@ func (c *Client) CreateIngress(host string, dryRun bool) (*v1.Ingress, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3000*time.Millisecond)
 	defer cancel()
 
-	ingressSpec := c.buildIngressSpec(host)
+	ingressSpec := c.BuildIngressSpec(host)
 
 	ingresses := c.Client.NetworkingV1().Ingresses(c.config.Namespace)
 	return ingresses.Create(ctx, &ingressSpec, createOpts)
 }
 
-func (c *Client) buildIngressSpec(host string) v1.Ingress {
+func (c *Client) BuildIngressSpec(host string) v1.Ingress {
 	var pc v1.ServiceBackendPort
 	if c.config.Service.Port.Number != nil {
 		pc = v1.ServiceBackendPort{Number: *c.config.Service.Port.Number}
