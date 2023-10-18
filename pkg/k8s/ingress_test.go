@@ -25,7 +25,7 @@ func TestBuildIngressSpec(t *testing.T) {
 		},
 	}
 
-	c, _ := NewClient(kc, ic)
+	c := Client{config: ic}
 
 	ingress := c.BuildIngressSpec("my.host")
 
@@ -62,7 +62,7 @@ func TestBuildIngressSpecWithPortName(t *testing.T) {
 			},
 		},
 	}
-	c, _ := NewClient(kc, ic)
+	c := Client{config: ic}
 
 	ingress := c.BuildIngressSpec("my.host")
 
