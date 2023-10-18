@@ -2,14 +2,14 @@ package config
 
 import "github.com/spf13/viper"
 
-type portConfig struct {
+type PortConfig struct {
 	Name   *string
 	Number *int32
 }
 
-type serviceConfig struct {
+type ServiceConfig struct {
 	Name string
-	Port portConfig
+	Port PortConfig
 }
 
 type IngressConfig struct {
@@ -17,7 +17,7 @@ type IngressConfig struct {
 	IngressClass  string
 	ClusterIssuer string
 	CustomMeta    map[string]string
-	Service       serviceConfig
+	Service       ServiceConfig
 }
 
 func GetIngressConfig() IngressConfig {
@@ -38,9 +38,9 @@ func GetIngressConfig() IngressConfig {
 		IngressClass:  viper.GetString("ingress.class"),
 		ClusterIssuer: viper.GetString("clusterIssuer"),
 		CustomMeta:    viper.GetStringMapString("ingress.customMeta"),
-		Service: serviceConfig{
+		Service: ServiceConfig{
 			Name: viper.GetString("ingress.service.name"),
-			Port: portConfig{},
+			Port: PortConfig{},
 		},
 	}
 

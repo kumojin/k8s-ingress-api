@@ -30,9 +30,9 @@ ingress:
 		IngressClass:  "nginx",
 		ClusterIssuer: "letsencrypt",
 		CustomMeta:    map[string]string{"nginx.ingress.kubernetes.io/force-ssl-redirect": "true"},
-		Service: serviceConfig{
+		Service: ServiceConfig{
 			Name: "example-svc",
-			Port: portConfig{
+			Port: PortConfig{
 				Number: &expectedPortNumber,
 			},
 		},

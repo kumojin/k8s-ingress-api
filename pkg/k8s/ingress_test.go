@@ -1,49 +1,102 @@
 package k8s
 
-// import (
-// 	"context"
-// 	"testing"
+import (
+	"github.com/kumojin/k8s-ingress-api/api/config"
+	"github.com/stretchr/testify/assert"
+	v1 "k8s.io/api/networking/v1"
+	"testing"
+)
 
-// 	"github.com/stretchr/testify/assert"
-// 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-// 	"k8s.io/client-go/kubernetes"
-// )
+func TestBuildIngressSpec(t *testing.T) {
+	kc := config.GetKubernetesConfig()
+	kc.InCluster = false
 
-// func TestBuildIngressCreateConfig(t *testing.T) {
-// 	createOpts := &IngressCreateTrimOptions{
-// 		Name:        "stent-urlshortener",
-// 		Host:        "linkedin.cofomo.com",
-// 		TargetHost:  "stnt.co",
-// 		ServicePort: 80,
-// 	}
-// 	create := BuildIngressCreateConfig(createOpts)
-// 	assert.Equal(t, "Ingress", create.TypeMeta.Kind)
-// 	assert.Equal(t, createOpts.Name, create.ObjectMeta.Name)
-// 	//TODO continue
-// }
+	p := int32(80)
+	ic := config.IngressConfig{
+		Namespace:     "my-namespace",
+		IngressClass:  "ingress-class",
+		ClusterIssuer: "cluster-issuer",
+		CustomMeta:    nil,
+		Service: config.ServiceConfig{
+			Name: "my-service",
+			Port: config.PortConfig{
+				Number: &p,
+			},
+		},
+	}
 
-// func TestCreateIngress(t *testing.T) {
-// 	ingressCreate := BuildIngressCreateConfig(&IngressCreateTrimOptions{
-// 		Name:        "stent-urlshortener",
-// 		Host:        "linkedin.cofomo.com",
-// 		TargetHost:  "stnt.co",
-// 		ServicePort: 80,
-// 	})
+	c, _ := NewClient(kc, ic)
 
-// 	config, err := BuildDefaultKubeConfig()
-// 	assert.Empty(t, err)
+	ingress := c.BuildIngressSpec("my.host")
 
-// 	k8sClient, err := kubernetes.NewForConfig(config)
-// 	assert.Empty(t, err)
+	assert.Equal(t, "my.host-ingress", ingress.Name)
+	assert.Equal(t, map[string]string{
+		"kumojin.com/managed-by":         "k8s-ingress-api",
+		"kubernetes.io/ingress.class":    ic.IngressClass,
+		"cert-manager.io/cluster-issuer": ic.ClusterIssuer,
+	}, ingress.Annotations)
 
-// 	ingresses := k8sClient.ExtensionsV1beta1().Ingresses(testNS)
+	assert.Equal(t, 1, len(ingress.Spec.Rules))
+	assert.Equal(t, "my.host", ingress.Spec.Rules[0].Host)
+	assert.Equal(t, 1, len(ingress.Spec.Rules[0].IngressRuleValue.HTTP.Paths))
+	assert.Equal(t, "/", ingress.Spec.Rules[0].IngressRuleValue.HTTP.Paths[0].Path)
+	assert.Equal(t, v1.PathTypeImplementationSpecific, *ingress.Spec.Rules[0].IngressRuleValue.HTTP.Paths[0].PathType)
+	assert.Equal(t, p, ingress.Spec.Rules[0].IngressRuleValue.HTTP.Paths[0].Backend.Service.Port.Number)
 
-// 	// create the ingress
-// 	// ingress, err := ingresses.Create(context.Background(), ingressCreate, metav1.CreateOptions{})
-// 	assert.Empty(t, err)
-// 	assert.NotEmpty(t, ingress)
+}
 
-// 	// then, delete it
-// 	err = ingresses.Delete(context.Background(), ingressCreate.Name, metav1.DeleteOptions{})
-// 	assert.Empty(t, err)
-// }
+func TestBuildIngressSpecWithPortName(t *testing.T) {
+	kc := config.GetKubernetesConfig()
+	kc.InCluster = false
+
+	p := "myPort"
+	ic := config.IngressConfig{
+		Namespace:     "my-namespace",
+		IngressClass:  "ingress-class",
+		ClusterIssuer: "cluster-issuer",
+		CustomMeta:    nil,
+		Service: config.ServiceConfig{
+			Name: "my-service",
+			Port: config.PortConfig{
+				Name: &p,
+			},
+		},
+	}
+	c, _ := NewClient(kc, ic)
+
+	ingress := c.BuildIngressSpec("my.host")
+
+	assert.Equal(t, 1, len(ingress.Spec.Rules))
+	assert.Equal(t, 1, len(ingress.Spec.Rules[0].IngressRuleValue.HTTP.Paths))
+	assert.Equal(t, p, ingress.Spec.Rules[0].IngressRuleValue.HTTP.Paths[0].Backend.Service.Port.Name)
+}
+
+func TestBuildIngressSpecWithCustomMeta(t *testing.T) {
+	kc := config.GetKubernetesConfig()
+	kc.InCluster = false
+
+	p := "myPort"
+	ic := config.IngressConfig{
+		Namespace:     "my-namespace",
+		IngressClass:  "ingress-class",
+		ClusterIssuer: "cluster-issuer",
+		CustomMeta:    map[string]string{"annotation1": "value1", "annotation2": "value2"},
+		Service: config.ServiceConfig{
+			Name: "my-service",
+			Port: config.PortConfig{
+				Name: &p,
+			},
+		},
+	}
+	c, _ := NewClient(kc, ic)
+
+	ingress := c.BuildIngressSpec("my.host")
+
+	assert.Equal(t, map[string]string{
+		"kumojin.com/managed-by":         "k8s-ingress-api",
+		"kubernetes.io/ingress.class":    ic.IngressClass,
+		"cert-manager.io/cluster-issuer": ic.ClusterIssuer,
+		"annotation1":                    "value1",
+		"annotation2":                    "value2",
+	}, ingress.Annotations)
+}
