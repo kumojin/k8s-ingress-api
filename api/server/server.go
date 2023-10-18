@@ -3,6 +3,7 @@ package server
 import (
 	"github.com/kumojin/k8s-ingress-api/api/config"
 	"github.com/kumojin/k8s-ingress-api/api/handler"
+	"github.com/kumojin/k8s-ingress-api/pkg/k8s"
 	"github.com/kumojin/k8s-ingress-api/pkg/network"
 	echo "github.com/labstack/echo/v4"
 	echomiddleware "github.com/labstack/echo/v4/middleware"
@@ -21,18 +22,18 @@ type validateCNAMEResponse struct {
 	Ok      bool   `json:"ok"`
 }
 
-func NewServer(kubernetesConfig config.KubernetesConfig, ingressConfig config.IngressConfig) *server {
+func NewServer(kubernetesConfig config.KubernetesConfig, ingressConfig config.IngressConfig, kclient *k8s.Client) *server {
 	s := &server{
 		ingressConfig:    ingressConfig,
 		kubernetesConfig: kubernetesConfig,
 	}
 
 	s.EchoServer = echo.New()
-	s.attachHandlers()
+	s.attachHandlers(kclient)
 	return s
 }
 
-func (s *server) attachHandlers() {
+func (s *server) attachHandlers(kc *k8s.Client) {
 	s.EchoServer.Use(echomiddleware.CORSWithConfig(echomiddleware.CORSConfig{
 		AllowOrigins: []string{"*"},
 		AllowMethods: []string{http.MethodOptions, http.MethodGet, http.MethodPost},
@@ -41,7 +42,7 @@ func (s *server) attachHandlers() {
 	s.EchoServer.Add(http.MethodGet, "/ping", s.ping)
 	s.EchoServer.Add(http.MethodGet, "/cname/:cname/matches/:matches", s.validateCNAME)
 
-	h := handler.NewHandler(s.kubernetesConfig, s.ingressConfig)
+	h := handler.NewHandler(kc, s.ingressConfig)
 	s.EchoServer.Add(http.MethodPost, "/ingress", h.CreateIngress)
 	//s.EchoServer.Add(http.MethodDelete, "/ingress/:name", h.DeleteIngress)
 }

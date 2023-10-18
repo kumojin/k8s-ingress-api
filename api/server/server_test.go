@@ -13,7 +13,7 @@ func TestPing(t *testing.T) {
 	kc := config.GetKubernetesConfig()
 	kc.InCluster = false
 	ic := config.IngressConfig{}
-	s := NewServer(kc, ic)
+	s := NewServer(kc, ic, nil)
 
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	rec := httptest.NewRecorder()
@@ -31,7 +31,7 @@ func TestValidateCNAMENotOk(t *testing.T) {
 	kc := config.GetKubernetesConfig()
 	kc.InCluster = false
 	ic := config.IngressConfig{}
-	s := NewServer(kc, ic)
+	s := NewServer(kc, ic, nil)
 
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	rec := httptest.NewRecorder()
@@ -51,7 +51,7 @@ func TestValidateCNAMEOk(t *testing.T) {
 	kc := config.GetKubernetesConfig()
 	kc.InCluster = false
 	ic := config.IngressConfig{}
-	s := NewServer(kc, ic)
+	s := NewServer(kc, ic, nil)
 
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	rec := httptest.NewRecorder()
@@ -66,7 +66,3 @@ func TestValidateCNAMEOk(t *testing.T) {
 		assert.Equal(t, "{\"cname\":\"m.facebook.com\",\"matches\":\"star-mini.c10r.facebook.com\",\"ok\":true}\n", string(rec.Body.Bytes()))
 	}
 }
-
-//TODO create ingress
-
-//TODO delete ingress
