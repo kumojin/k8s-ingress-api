@@ -33,8 +33,15 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - name: Docker meta
+        id: docker_meta
+        uses: crazy-max/ghaction-docker-meta@v1
+        with:
+          images: kumojin/ingress-api
+
       - name: Build
         uses: docker/build-push-action@v5
         with:
           push: true
-          tags: kumojin/ingress-api:${GITHUB_REF#refs/tags/}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
