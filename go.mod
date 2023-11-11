@@ -4,7 +4,7 @@ go 1.21
 
 require (
 	github.com/labstack/echo/v4 v4.11.2
-	github.com/spf13/cobra v1.7.0
+	github.com/spf13/cobra v1.8.0
 	github.com/spf13/viper v1.17.0
 	github.com/stretchr/testify v1.8.4
 	k8s.io/api v0.25.2
