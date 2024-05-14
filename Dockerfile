@@ -1,4 +1,4 @@
-FROM golang:1.21-alpine@sha256:b3aea8df13191dab7d2e44a7fbc51d7b09bb796547127da8d74cfb81e5d65923 as build
+FROM golang:1.22-alpine@sha256:2a882244fb51835ebbd8313bffee83775b0c076aaf56b497b43d8a4c72db65e1 as build
 COPY . /code
 WORKDIR /code
 ENV CGO_ENABLED=0
