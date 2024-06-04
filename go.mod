@@ -2,7 +2,7 @@ module github.com/kumojin/k8s-ingress-api
 
 go 1.22.0
 
-toolchain go1.22.3
+toolchain go1.22.4
 
 require (
 	github.com/labstack/echo/v4 v4.12.0
