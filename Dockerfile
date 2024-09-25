@@ -6,7 +6,7 @@ ENV GOPROXY=https://proxy.golang.org
 RUN go mod download && \
     go build -o app
 
-FROM alpine:3.20@sha256:beefdbd8a1da6d2915566fde36db9db0b524eb737fc57cd1367effd16dc0d06d
+FROM alpine:3.20@sha256:e72ad0747b9dc266fca31fb004580d316b6ae5b0fdbbb65f17bbe371a5b24cff
 RUN apk add --no-cache tzdata ca-certificates
 COPY --from=build /code/app /app/app
 WORKDIR /app
