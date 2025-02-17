@@ -6,7 +6,7 @@ toolchain go1.24.0
 
 require (
 	github.com/labstack/echo/v4 v4.13.3
-	github.com/spf13/cobra v1.9.0
+	github.com/spf13/cobra v1.9.1
 	github.com/spf13/viper v1.19.0
 	github.com/stretchr/testify v1.10.0
 	k8s.io/api v0.32.2
